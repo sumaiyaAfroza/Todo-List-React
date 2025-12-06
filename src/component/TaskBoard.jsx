@@ -4,6 +4,7 @@ import {TaskActions} from "./TaskActions.jsx";
 import {TaskList} from "./TaskList.jsx";
 import NoTaskFound from "./NoTaskFound.jsx";
 import Modal from './Modal.jsx';
+import SearchTask from "./searchTask.jsx";
 
 const TaskBoard = () => {
   const [tasks, setTasks] = useState([])
@@ -19,14 +20,18 @@ const TaskBoard = () => {
     taskTitle: ''
   })
   const [deleteAllTask, setDeleteAllTask] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
 
+  const handleSearch = (searchValue) => {
+    setSearchTerm(searchValue)
+  }
 
   const handleAddEditTask = (isAdd, newTask) => {
     let updateTask
-    if(isAdd){
+    if (isAdd) {
       updateTask = [...allTasks, newTask]
-    }else {
-      updateTask = allTasks.map(task => task.id === newTask.id ? newTask : task) 
+    } else {
+      updateTask = allTasks.map(task => task.id === newTask.id ? newTask : task)
     }
     setAllTasks(updateTask)
     setShowAddModal(false)
@@ -34,10 +39,8 @@ const TaskBoard = () => {
   // console.log(allTasks)
 
   const handleFavorite = taskId => {
-    const favorite = allTasks.map(task => 
-      
+    const favorite = allTasks.map(task =>
         task.id === taskId ? {...task, isFavorite: !task.isFavorite} : task
-      
       // if(task.id === taskId) {
       //   return {
       //     ...task,
@@ -45,11 +48,10 @@ const TaskBoard = () => {
       //   }
       // }
       // return task
-    
     )
-     setAllTasks(favorite)
+    setAllTasks(favorite)
   }
-    
+
   const handleEditTask = task => {
     setTaskToUpdate(task)
     setShowAddModal(true)
@@ -61,11 +63,11 @@ const TaskBoard = () => {
   }
 
   const handleDeleteTask = (taskId, taskTitle) => {
-   setDeleteModal({
-    isOpen: true,
-    taskId: taskId,
-    taskTitle: taskTitle
-   })
+    setDeleteModal({
+      isOpen: true,
+      taskId: taskId,
+      taskTitle: taskTitle
+    })
   }
 
   const confirmDeleteTask = () => {
@@ -78,15 +80,15 @@ const TaskBoard = () => {
     })
   }
 
-  
-  const handleAllDelete = ()=> {
-    if(allTasks.length === 0 ) return null
+
+  const handleAllDelete = () => {
+    if (allTasks.length === 0) return null
     setDeleteAllTask(true)
   }
 
   const confirmDeleteAllTask = () => {
-     setAllTasks([])
-     setDeleteAllTask(false)
+    setAllTasks([])
+    setDeleteAllTask(false)
   }
 
 
@@ -94,7 +96,7 @@ const TaskBoard = () => {
     <section className="mb-20" id="tasks">
       <Modal
         isOpen={deleteModal.isOpen}
-        onClose={() => setDeleteModal({ isOpen: false, taskId: null, taskTitle: '' })}
+        onClose={() => setDeleteModal({isOpen: false, taskId: null, taskTitle: ''})}
         onConfirm={confirmDeleteTask}
         title="Delete Task"
         message={`Are you sure you want to delete "${deleteModal.taskTitle}"?`}
@@ -125,25 +127,30 @@ const TaskBoard = () => {
           handleCloseClick={handleCloseClick}
         />
       )}
+
+      <div className='container'>
+        <div className='p-2 flex justify-end mb-4'>
+          <SearchTask onSearch={handleSearch}/>
+        </div>
+      </div>
+
       <div className="rounded-xl border border-[rgba(206,206,206,0.12)] bg-[#1D212B] px-6 py-8 md:px-9 md:py-16">
         <TaskActions
-           onAddClick={() => {
-    setTaskToUpdate(null)  // এটি নিশ্চিত করবে যে নতুন task add করার সময় field empty থাকবে
-    setShowAddModal(true)
-  }}
-
+          onAddClick={() => {
+            setTaskToUpdate(null)  // এটি নিশ্চিত করবে যে নতুন task add করার সময় field empty থাকবে
+            setShowAddModal(true)
+          }}
           onDeleteAllClick={handleAllDelete}
-         
         />
         {
           allTasks.length > 0 ?
             (
-              <TaskList allTasks={allTasks} 
-               onFav={handleFavorite} 
-               onEdit={handleEditTask}
-               onDelete={handleDeleteTask}
-               />
-            ) : ( <NoTaskFound/>)
+              <TaskList allTasks={allTasks}
+                        onFav={handleFavorite}
+                        onEdit={handleEditTask}
+                        onDelete={handleDeleteTask}
+              />
+            ) : (<NoTaskFound/>)
         }
       </div>
     </section>

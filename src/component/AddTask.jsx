@@ -1,215 +1,274 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 
-const AddTask = ({onSave,taskToUpdate, handleCloseClick}) => {
+export const AddTask = ({ onSave, taskToUpdate, handleCloseClick }) => {
   const [task, setTask] = useState(
     taskToUpdate || {
-    id: crypto.randomUUID(),
-    title: '',
-    description:'',
-    tags:[],
-    priority:'',
-    isFavorite: false
-  })
+      id: crypto.randomUUID(),
+      title: '',
+      description: '',
+      tags: [],
+      priority: '',
+      isFavorite: false,
+    }
+  );
 
-  const [isAdd] = useState(Object.is(taskToUpdate, null))
-  const [errors, setErrors] = useState({})
+  const [isAdd] = useState(Object.is(taskToUpdate, null));
+  const [errors, setErrors] = useState({});
 
-  const handleChange = (e) => {
-    const name = e.target.name
-      let value = e.target.value
-    if(name === 'tags'){
-     value =  value.split(',')
+  const validateForm = () => {
+    const newErrors = {};
+    if (!task.title) {
+      newErrors.title = 'title is required';
     }
-    setTask({
-      ...task, [name]: value
-    })
-    if(errors[name]) {
-      setErrors({
-        ...errors,
-        [name] : ''
-      })
+    if (!task.description) {
+      newErrors.description = 'description is required';
     }
-  }
-
-  const validError = () => {
-    const newErrors = {}
-    if(!task.title) {
-      newErrors.title = 'title is required'
-    }
-    if(!task.description){
-      newErrors.description = 'description is required'
-    }
-    if(!task.tags || task.tags.length === 0) {
-      newErrors.tags = 'tags is required'
-    }else {
-      const hasTags = task.tags.some(tag => !tag.trim())
-      if(hasTags){
-        newErrors.tags = 'Empty Tags are not allow'
+    if (!task.tags || task.tags.length === 0) {
+      newErrors.tags = 'at least one tag is required';
+    } else {
+      const hasEmptyTags = task.tags.some((tag) => !tag.trim());
+      if (hasEmptyTags) {
+        newErrors.tags = 'empty tags are not allowed';
       }
     }
-    if(!task.priority){
-      newErrors.priority = 'priority is required'
+    if (!task.priority) {
+      newErrors.priority = 'priority is required';
     }
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  const handleSubmit  = (e) => {
-    e.preventDefault()
-    const cleanTask = {
+  const handleChange = (e) => {
+    const name = e.target.name;
+    let value = e.target.value;
+    if (name === 'tags') {
+      value = value.split(',');
+    }
+    setTask({
       ...task,
-      tags: task.tags.filter(tag => tag.trim()) /* trim na korle falsy "ok" = truthy(js niyome) r oitai dibe filter kore . otherwise filter kore aita paile  "" bad dibe*/
+      [name]: value,
+    });
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: '',
+      });
     }
-    if(validError()){
-      onSave(isAdd, cleanTask)
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const cleanedTask = {
+      ...task,
+      tags: task.tags.filter((tag) => tag.trim()),
+    };
+    if (validateForm()) {
+      onSave(isAdd, cleanedTask);
     }
-  }
+  };
 
   return (
-    <>
-      <div className="bg-gradient-to-br from-black/70 via-indigo-950/50 to-purple-950/50 backdrop-blur-lg h-full w-full z-10 absolute top-0 left-0"></div>
-      <form
-        onSubmit={handleSubmit}
-        className="mx-auto my-10 w-full max-w-[740px] rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-slate-900/98 via-indigo-950/98 to-purple-950/98 backdrop-blur-2xl shadow-2xl shadow-indigo-500/30 p-9 max-md:px-4 lg:my-20 lg:p-11 z-10 absolute top-1/4 left-1/3">
-        <h2 className="mb-9 text-center text-2xl font-bold lg:mb-11 lg:text-[28px] bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
-          {isAdd ? "✨ Add New Task" : "📝 Edit Task" }
-        </h2>
-
-        <div className="space-y-6 text-white lg:space-y-7">
-          {/* Title Field */}
-          <div className="space-y-2 lg:space-y-3 group">
-            <label htmlFor="title" className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500"></span>
-              Title <span className="text-red-400">*</span>
-            </label>
-            <input
-              className={`block w-full rounded-xl bg-slate-800/60 border ${
-                errors.title ? 'border-red-500/50 focus:ring-red-500/60' : 'border-slate-600/30 focus:ring-blue-500/60'
-              } px-4 py-3.5 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2`}
-              type="text"
-              name="title"
-              id="title"
-              placeholder="Enter task title..."
-              value={task.title}
-              onChange={handleChange}
-            />
-            {errors.title && (
-              <p className="text-red-400 text-sm flex items-center gap-1 mt-1">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                {errors.title}
-              </p>
-            )}
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+      <div className="w-full max-w-2xl">
+        <div className="relative rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 backdrop-blur-xl shadow-2xl shadow-purple-500/20 p-8 lg:p-10 animate-in zoom-in-95 duration-300">
+          {/* Decorative elements */}
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden rounded-3xl pointer-events-none">
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl"></div>
           </div>
 
-          {/* Description Field */}
-          <div className="space-y-2 lg:space-y-3 group">
-            <label htmlFor="description" className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500"></span>
-              Description <span className="text-red-400">*</span>
-            </label>
-            <textarea
-              className={`block min-h-[120px] w-full rounded-xl bg-slate-800/60 border ${
-                errors.description ? 'border-red-500/50 focus:ring-red-500/60' : 'border-slate-600/30 focus:ring-indigo-500/60'
-              } px-4 py-3.5 text-white placeholder:text-slate-500 lg:min-h-[180px] focus:outline-none focus:ring-2 resize-none`}
-              name="description"
-              id="description"
-              placeholder="Describe your task..."
-              value={task.description}
-              onChange={handleChange}
-            ></textarea>
-            {errors.description && (
-              <p className="text-red-400 text-sm flex items-center gap-1 mt-1">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                {errors.description}
-              </p>
-            )}
-          </div>
-
-          <div className="grid-cols-2 gap-x-4 max-md:space-y-6 md:grid lg:gap-x-6">
-            {/* Tags Field */}
-            <div className="space-y-2 lg:space-y-3 group">
-              <label htmlFor="tags" className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500"></span>
-                Tags <span className="text-red-400">*</span>
-              </label>
-              <input
-                className={`block w-full rounded-xl bg-slate-800/60 border ${
-                  errors.tags ? 'border-red-500/50 focus:ring-red-500/60' : 'border-slate-600/30 focus:ring-purple-500/60'
-                } px-4 py-3.5 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2`}
-                type="text"
-                name="tags"
-                id="tags"
-                placeholder="work, urgent, design"
-                value={task.tags}
-                onChange={handleChange}
-              />
-              {errors.tags && (
-                <p className="text-red-400 text-sm flex items-center gap-1 mt-1">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  {errors.tags}
-                </p>
-              )}
-            </div>
-
-            {/* Priority Field */}
-            <div className="space-y-2 lg:space-y-3 group">
-              <label htmlFor="priority" className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-400 to-pink-500"></span>
-                Priority <span className="text-red-400">*</span>
-              </label>
-              <select
-                className={`block w-full cursor-pointer rounded-xl bg-slate-800/60 border ${
-                  errors.priority ? 'border-red-500/50 focus:ring-red-500/60' : 'border-slate-600/30 focus:ring-pink-500/60'
-                } px-4 py-3.5 text-white focus:outline-none focus:ring-2`}
-                name="priority"
-                id="priority"
-                value={task.priority}
-                onChange={handleChange}
+          {/* Header */}
+          <div className="relative mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
+                {isAdd ? '✨ Create New Task' : '📝 Edit Task'}
+              </h2>
+              <button
+                onClick={handleCloseClick}
+                type="button"
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 flex items-center justify-center text-slate-400 hover:text-red-400 transition-all duration-300"
               >
-                <option value="">Select Priority</option>
-                <option value="Low">🟢 Low</option>
-                <option value="Medium">🟡 Medium</option>
-                <option value="High">🔴 High</option>
-              </select>
-              {errors.priority && (
-                <p className="text-red-400 text-sm flex items-center gap-1 mt-1">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                ✕
+              </button>
+            </div>
+            <p className="text-sm text-slate-400">Fill in the details to {isAdd ? 'create' : 'update'} your task</p>
+          </div>
+
+          <div className="relative space-y-6">
+            {/* Title Field */}
+            <div className="space-y-2 group">
+              <label
+                htmlFor="title"
+                className="text-sm font-semibold text-slate-300 flex items-center gap-2"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 group-hover:shadow-lg group-hover:shadow-cyan-500/50 transition-shadow"></span>
+                Task Title
+                <span className="text-red-400 ml-0.5">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  className={`block w-full rounded-xl bg-white/5 border ${
+                    errors.title
+                      ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+                      : 'border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                  } px-4 py-3.5 text-white placeholder:text-slate-500 focus:outline-none transition-all duration-300 hover:bg-white/10`}
+                  type="text"
+                  name="title"
+                  id="title"
+                  placeholder="e.g., Complete project documentation"
+                  value={task.title}
+                  onChange={handleChange}
+                />
+              </div>
+              {errors.title && (
+                <p className="text-red-400 text-xs flex items-center gap-1.5 animate-in slide-in-from-top-1 duration-200">
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
                   </svg>
-                  {errors.priority}
+                  {errors.title}
                 </p>
               )}
             </div>
+
+            {/* Description Field */}
+            <div className="space-y-2 group">
+              <label
+                htmlFor="description"
+                className="text-sm font-semibold text-slate-300 flex items-center gap-2"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 group-hover:shadow-lg group-hover:shadow-blue-500/50 transition-shadow"></span>
+                Description
+                <span className="text-red-400 ml-0.5">*</span>
+              </label>
+              <textarea
+                className={`block min-h-[120px] w-full rounded-xl bg-white/5 border ${
+                  errors.description
+                    ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+                    : 'border-white/10 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20'
+                } px-4 py-3.5 text-white placeholder:text-slate-500 focus:outline-none transition-all duration-300 resize-none hover:bg-white/10`}
+                name="description"
+                id="description"
+                placeholder="Describe what needs to be done..."
+                value={task.description}
+                onChange={handleChange}
+              ></textarea>
+              {errors.description && (
+                <p className="text-red-400 text-xs flex items-center gap-1.5 animate-in slide-in-from-top-1 duration-200">
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {errors.description}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Tags Field */}
+              <div className="space-y-2 group">
+                <label
+                  htmlFor="tags"
+                  className="text-sm font-semibold text-slate-300 flex items-center gap-2"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 group-hover:shadow-lg group-hover:shadow-purple-500/50 transition-shadow"></span>
+                  Tags
+                  <span className="text-red-400 ml-0.5">*</span>
+                </label>
+                <input
+                  className={`block w-full rounded-xl bg-white/5 border ${
+                    errors.tags
+                      ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+                      : 'border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20'
+                  } px-4 py-3.5 text-white placeholder:text-slate-500 focus:outline-none transition-all duration-300 hover:bg-white/10`}
+                  type="text"
+                  name="tags"
+                  id="tags"
+                  placeholder="work, urgent, design"
+                  value={task.tags}
+                  onChange={handleChange}
+                />
+                {errors.tags && (
+                  <p className="text-red-400 text-xs flex items-center gap-1.5 animate-in slide-in-from-top-1 duration-200">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    {errors.tags}
+                  </p>
+                )}
+              </div>
+
+              {/* Priority Field */}
+              <div className="space-y-2 group">
+                <label
+                  htmlFor="priority"
+                  className="text-sm font-semibold text-slate-300 flex items-center gap-2"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 group-hover:shadow-lg group-hover:shadow-pink-500/50 transition-shadow"></span>
+                  Priority Level
+                  <span className="text-red-400 ml-0.5">*</span>
+                </label>
+                <select
+                  className={`block w-full cursor-pointer rounded-xl bg-white/5 border ${
+                    errors.priority
+                      ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+                      : 'border-white/10 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20'
+                  } px-4 py-3.5 text-white focus:outline-none transition-all duration-300 hover:bg-white/10`}
+                  name="priority"
+                  id="priority"
+                  value={task.priority}
+                  onChange={handleChange}
+                >
+                  <option value="" className="bg-slate-900">Select Priority</option>
+                  <option value="Low" className="bg-slate-900">🟢 Low Priority</option>
+                  <option value="Medium" className="bg-slate-900">🟡 Medium Priority</option>
+                  <option value="High" className="bg-slate-900">🔴 High Priority</option>
+                </select>
+                {errors.priority && (
+                  <p className="text-red-400 text-xs flex items-center gap-1.5 animate-in slide-in-from-top-1 duration-200">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    {errors.priority}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-8 flex gap-3">
+            <button
+              onClick={handleCloseClick}
+              type="button"
+              className="flex-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-red-500/30 px-6 py-3.5 text-white font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-red-500/20 active:scale-95"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              type="button"
+              className="flex-1 rounded-xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-600 px-6 py-3.5 text-white font-semibold transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 active:scale-95"
+            >
+              {isAdd ? '✓ Create Task' : '✓ Update Task'}
+            </button>
           </div>
         </div>
-
-        <div
-          className="mt-12 flex justify-between gap-4 lg:mt-16">
-          <button
-            type="button"
-            className="rounded-xl bg-gradient-to-r from-red-600 to-rose-700 px-8 py-3.5 text-white font-semibold transition-all duration-300 hover:shadow-2xl hover:-translate-y-0.5 active:scale-95"
-            onClick={handleCloseClick}
-          >
-            ✕ Close
-          </button>
-
-          <button
-            type="submit"
-            className="rounded-xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 px-8 py-3.5 text-white font-semibold transition-all duration-300 hover:shadow-2xl hover:-translate-y-0.5 active:scale-95"
-
-           >
-            {isAdd ? "✓ Create Task" : "✓ Update Task"}
-          </button>
-        </div>
-      </form>
-    </>
+      </div>
+    </div>
   );
 };
-
-export default AddTask;
