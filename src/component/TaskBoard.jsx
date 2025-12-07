@@ -1,10 +1,12 @@
-import React, {useState} from 'react';
-import AddTask from "./AddTask.jsx";
+import React, {useEffect, useState} from 'react';
+import {AddTask} from "./AddTask.jsx";
 import {TaskActions} from "./TaskActions.jsx";
 import {TaskList} from "./TaskList.jsx";
 import NoTaskFound from "./NoTaskFound.jsx";
 import Modal from './Modal.jsx';
 import SearchTask from "./searchTask.jsx";
+import {PriorityFilter} from "./PriorityFilter.jsx";
+import {TagFilter} from "./TagFilter.jsx";
 
 const TaskBoard = () => {
   const [tasks, setTasks] = useState([])
@@ -22,8 +24,63 @@ const TaskBoard = () => {
   const [deleteAllTask, setDeleteAllTask] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
 
+  const getAvailableTags = () => {
+    let available = new Set()
+    allTasks.forEach(task => {
+      task.tags.forEach( tag =>{
+          if(tag && tag.trim()) {
+            available.add(tag)
+          }
+        }
+      )
+      }
+    )
+    return Array.from(available).sort()
+  }
+  const availableTags = getAvailableTags()
+
+  const handleTagToggle = (tag) => {
+    setSelectedTags(prevState => {
+      if(prevState.includes(tag)) {
+       return prevState.filter(tg => tg !== tag)
+      }else{
+      return  [...prevState, tag]
+      }
+    })
+  }
+
+
   const handleSearch = (searchValue) => {
     setSearchTerm(searchValue)
+  }
+
+    const handlePriorityChange = (selectPriority) => {
+    setSelectedPriority(selectPriority)}
+
+  useEffect(() => {
+    applyAllFilter()
+  }, [searchTerm, allTasks, selectedPriority, selectedTags]);
+
+  const applyAllFilter = () => {
+    let filtered = [...allTasks]
+    if(searchTerm.trim() !== '') {
+      filtered = filtered.filter(task =>
+      task.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    }
+    if(selectedPriority !== 'all') {
+      filtered = filtered.filter(task =>
+      task.priority.toLowerCase() === selectedPriority.toLowerCase())
+    }
+    if(selectedTags.length > 0) {
+      filtered = filtered.filter(task =>
+        selectedTags.some(tag => task.tags.includes(tag))
+      )
+    }
+    setTasks(filtered)
+  }
+
+  const handleClearTags = () => {
+    setSelectedTags([])
   }
 
   const handleAddEditTask = (isAdd, newTask) => {
@@ -134,6 +191,20 @@ const TaskBoard = () => {
         </div>
       </div>
 
+      <div className="mb-4 space-y-4">
+        <PriorityFilter
+          selectedPriority={selectedPriority}
+          onPriorityChange={handlePriorityChange}
+        />
+
+        <TagFilter
+          availableTags={availableTags}
+          selectedTags={selectedTags}
+          onTagToggle={handleTagToggle}
+          onClearTags={handleClearTags}
+        />
+      </div>
+
       <div className="rounded-xl border border-[rgba(206,206,206,0.12)] bg-[#1D212B] px-6 py-8 md:px-9 md:py-16">
         <TaskActions
           onAddClick={() => {
@@ -145,7 +216,8 @@ const TaskBoard = () => {
         {
           allTasks.length > 0 ?
             (
-              <TaskList allTasks={allTasks}
+              <TaskList allTasks={tasks}
+
                         onFav={handleFavorite}
                         onEdit={handleEditTask}
                         onDelete={handleDeleteTask}
