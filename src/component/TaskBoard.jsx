@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {AddTask} from "./AddTask.jsx";
 import {TaskActions} from "./TaskActions.jsx";
 import {TaskList} from "./TaskList.jsx";
@@ -9,8 +9,8 @@ import {PriorityFilter} from "./PriorityFilter.jsx";
 import {TagFilter} from "./TagFilter.jsx";
 
 const TaskBoard = () => {
-  const [tasks, setTasks] = useState([])
-  const [allTasks, setAllTasks] = useState([])
+  // const [tasks, setTasks] = useState([]) /* filter korar porer task gula joma hoi*/
+  const [allTasks, setAllTasks] = useState([])  /* direct add original gula joma hobe */
   const [loading, setLoading] = useState(false)
   const [selectedTags, setSelectedTags] = useState([])
   const [selectedPriority, setSelectedPriority] = useState('all')
@@ -29,7 +29,7 @@ const TaskBoard = () => {
     allTasks.forEach(task => {
       task.tags.forEach( tag =>{
           if(tag && tag.trim()) {
-            available.add(tag)
+            available.add(tag.trim())
           }
         }
       )
@@ -48,8 +48,6 @@ const TaskBoard = () => {
       }
     })
   }
-
-
   const handleSearch = (searchValue) => {
     setSearchTerm(searchValue)
   }
@@ -57,27 +55,27 @@ const TaskBoard = () => {
     const handlePriorityChange = (selectPriority) => {
     setSelectedPriority(selectPriority)}
 
-  useEffect(() => {
-    applyAllFilter()
-  }, [searchTerm, allTasks, selectedPriority, selectedTags]);
-
-  const applyAllFilter = () => {
+  const applyAllFilter = useMemo(() => {
     let filtered = [...allTasks]
     if(searchTerm.trim() !== '') {
       filtered = filtered.filter(task =>
-      task.title.toLowerCase().includes(searchTerm.toLowerCase()))
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()))
     }
     if(selectedPriority !== 'all') {
       filtered = filtered.filter(task =>
-      task.priority.toLowerCase() === selectedPriority.toLowerCase())
+        task.priority.toLowerCase() === selectedPriority.toLowerCase())
     }
     if(selectedTags.length > 0) {
       filtered = filtered.filter(task =>
         selectedTags.some(tag => task.tags.includes(tag))
       )
     }
-    setTasks(filtered)
-  }
+    return filtered
+    // setTasks(filtered)
+
+  }, [searchTerm, allTasks, selectedPriority, selectedTags]);
+
+
 
   const handleClearTags = () => {
     setSelectedTags([])
@@ -137,7 +135,6 @@ const TaskBoard = () => {
     })
   }
 
-
   const handleAllDelete = () => {
     if (allTasks.length === 0) return null
     setDeleteAllTask(true)
@@ -147,7 +144,6 @@ const TaskBoard = () => {
     setAllTasks([])
     setDeleteAllTask(false)
   }
-
 
   return (
     <section className="mb-20" id="tasks">
@@ -187,7 +183,7 @@ const TaskBoard = () => {
 
       <div className='container'>
         <div className='p-2 flex justify-end mb-4'>
-          <SearchTask onSearch={handleSearch}/>
+          <SearchTask onSearch={handleSearch} searchTerm={searchTerm}/>
         </div>
       </div>
 
@@ -214,10 +210,9 @@ const TaskBoard = () => {
           onDeleteAllClick={handleAllDelete}
         />
         {
-          allTasks.length > 0 ?
+          applyAllFilter.length > 0 ?
             (
-              <TaskList allTasks={tasks}
-
+              <TaskList allTasks={applyAllFilter}
                         onFav={handleFavorite}
                         onEdit={handleEditTask}
                         onDelete={handleDeleteTask}

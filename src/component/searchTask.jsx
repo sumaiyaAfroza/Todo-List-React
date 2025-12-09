@@ -1,16 +1,13 @@
 import React, {useState} from 'react';
 
-const SearchTask = ({onSearch}) => {
-  const [searchTerm, setSearchTerm] = useState('')
+const SearchTask = ({onSearch, searchTerm}) => {
   const [isFocused, setIsFocused] = useState(false)
 
   const handleChange = (e) => {
     const value = e.target.value
-    setSearchTerm(value)
     onSearch(value)
   }
   const handleClear = () => {
-    setSearchTerm('')
     onSearch('')
   }
 
