@@ -37,7 +37,7 @@ const TaskBoard = () => {
     )
     return Array.from(available).sort()
   }
-  const availableTags = getAvailableTags()
+  const availableTags  = getAvailableTags()
 
   const handleTagToggle = (tag) => {
     setSelectedTags(prevState => {
@@ -48,12 +48,14 @@ const TaskBoard = () => {
       }
     })
   }
+
   const handleSearch = (searchValue) => {
     setSearchTerm(searchValue)
   }
 
     const handlePriorityChange = (selectPriority) => {
-    setSelectedPriority(selectPriority)}
+    setSelectedPriority(selectPriority)
+  }
 
   const applyAllFilter = useMemo(() => {
     let filtered = [...allTasks]
@@ -194,7 +196,7 @@ const TaskBoard = () => {
         />
 
         <TagFilter
-          availableTags={availableTags}
+          availableTags={z}
           selectedTags={selectedTags}
           onTagToggle={handleTagToggle}
           onClearTags={handleClearTags}
