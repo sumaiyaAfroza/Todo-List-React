@@ -196,7 +196,7 @@ const TaskBoard = () => {
         />
 
         <TagFilter
-          availableTags={z}
+          availableTags={availableTags}
           selectedTags={selectedTags}
           onTagToggle={handleTagToggle}
           onClearTags={handleClearTags}
