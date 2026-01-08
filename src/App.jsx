@@ -55,10 +55,10 @@ export const App = () => {
   }
 
   return (
-    <>
-      <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <Header />
-        <HeroSection />
+    <><Header />
+      <HeroSection />
+      <div className=" pb-10 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950">
+
         <TaskBoard />
       </div>
 

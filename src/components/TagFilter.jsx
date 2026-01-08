@@ -3,7 +3,7 @@ import {getTagGradientStyle} from './tagColors.js';
 
 export const TagFilter = ({ availableTags, selectedTags, onTagToggle, onClearTags }) => {
   return (
-    <div className="w-full max-w-2xl mx-auto mb-6">
+    <div className="w-full max-w-5xl mx-auto mb-6">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

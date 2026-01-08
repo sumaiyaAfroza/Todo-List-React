@@ -162,7 +162,7 @@ const handleCloseClick = ()=> {
       </section>
     )
   }
-  return <section className="mb-20" id="tasks">
+  return <section  id="tasks">
 
     {/* delete one modal */}
     <Modal
